@@ -1,11 +1,10 @@
 from typing import Optional
-from fastapi import FastAPI, Depends, Form, HTTPException, Path, Query, Header, Response, Cookie
+from fastapi import FastAPI, Depends, HTTPException, Query
 from pymongo import MongoClient
 from pydantic import BaseModel, Field 
 from datetime import datetime
 from bson import ObjectId
 from bson.errors import InvalidId
-import json
 
 
 
@@ -64,7 +63,7 @@ def get_all_id(db=Depends(get_db)):
 
 @app.get('/post/id')
 def buscar_id(
-    id: Optional[str] = Query(None, min_length=1,max_length=255, descriptions='Filtrar Titulo'),
+    id: Optional[str] = Query(None, descriptions='Filtrar ID'),
     db = Depends(get_db)
 ):
     filtro = {}
@@ -100,11 +99,8 @@ def create_one_post_json_data(post: PostCreate, db = Depends(get_db)):
         "nota":post.nota,
         "fecha": datetime.now() 
     }
-    print(new_post)
     result = db['ef'].insert_one(new_post)
-    print(result.inserted_id)
     created_post = db ['ef'].find_one({'_id': result.inserted_id})
-    print(created_post)
 
     return {
         'id': str(created_post['_id']),
@@ -144,6 +140,7 @@ def edit_one_post(id: str, post: PostCreate, db = Depends(get_db)):
         'nota': updated_post['nota'],
         'fecha': updated_post['fecha'].isoformat()
     }
+
 
 
 @app.delete("/post/delete/{id}")
